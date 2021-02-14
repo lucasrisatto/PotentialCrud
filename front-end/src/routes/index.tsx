@@ -1,13 +1,14 @@
 import React from "react";
 import { Switch, Route } from "react-router-dom";
-
 import Developers from "../pages/Developers";
-import DevelopersList from "../pages/List";
+
+import DevelopersForm from "../pages/Developers/form";
 
 const Routes: React.FC = () => (
   <Switch>
     <Route path="/" exact component={Developers} />
-    <Route path="/list" exact component={DevelopersList} />
+    <Route path="/developers/new" exact component={DevelopersForm} />
+    <Route path="/developers/:id/edit" exact component={DevelopersForm} />
   </Switch>
 );
 

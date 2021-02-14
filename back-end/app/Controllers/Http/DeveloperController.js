@@ -1,15 +1,27 @@
 'use strict'
 const Developer = use('App/Models/Developer')
+let query = Developer.query()
+const queries = use('App/Functions/Query')
+const schema = 'Developer'
 class DeveloperController {
   async index({ request, response }) {
-    try {
-      const developer = request.all()
-      return developer
-    } catch (err) {
-      return response.send({
-        message: 'Ocorreu um erro ao exibir os dados de desenvolvedor, por favor verifique!'
-      })
+    const data = request.only(['search', 'id', 'name'])
+    const { page, order, limit } = request.get()
+    if (order === 'id') {
+      query = Developer.query().orderBy(order, 'DESC')
+    } else {
+      query = Developer.query().orderBy(order)
     }
+
+    if (data.search) {
+      const search = data.search
+      queries({ search, query, schema })
+    }
+    if (data.id || data.name) {
+      data.id ? query.orWhere('id', '=', data.id) : ''
+      data.name ? query.orWhere('name', 'LIKE', '%' + data.name + '%') : ''
+    }
+    return query.paginate(page, limit)
   }
 
   async store({ request, response }) {

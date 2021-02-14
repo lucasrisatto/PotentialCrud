@@ -1,84 +1,187 @@
-import React, { useCallback, useRef } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Link, useHistory } from "react-router-dom";
-import { Form } from "@unform/web";
-import { FormHandles } from "@unform/core";
-import * as Yup from 'yup';
+import Swal from "sweetalert2";
 
-import Input from "../../components/Input";
-import { AnimationContainer, Container, Content } from "./styles";
+import ButtonCustom from "../../components/ButtonCustom";
+import Card from "../../components/Card";
+import CardBody from "../../components/CardBody";
+import Table from "../../components/Table";
+import TitlePage from "../../components/TitlePage";
+import { useToast } from "../../hooks/toast";
 import api from "../../services/api";
-import getValidationErrors from '../../utils/validation'
+import { date } from "../../utils/formatDate";
+import columns from "./schema";
 
 interface DevelopersData {
   id: number;
   name: string;
   sex: string;
   age: number;
-  hobby: string
+  hobby: string;
   date_birth: string;
 }
 
 const Developers: React.FC = () => {
+  const { addToast } = useToast();
   const history = useHistory();
-  const formRef = useRef<FormHandles>(null);
+  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [count, setCount] = useState(0);
+  const [page, setPage] = useState(1);
+  const [developer, setDeveloper] = useState<DevelopersData[]>([]);
 
-  const handleSubmit = useCallback(
-    async (data: DevelopersData) => {
-      try {
-        formRef.current?.setErrors({});
-        const schema = Yup.object().shape({
-          name: Yup.string().required('Nome obrigatório!'),
-          age: Yup.string().required('Idade obrigatória!'),
-          date_birth: Yup.date().required('Data de nascimento obrigatória!'),
-        });
+  async function getData(url: string) {
+    try {
+      setLoading(true);
+      const response = await api.get(url);
+      console.log("response", response);
+      setDeveloper(response.data.data);
+      setCount(response.data.total);
+      setLoading(false);
+    } catch (err) {
+      setDeveloper([]);
+      /*addToast({
+        type: "error",
+        title: "Não foi possível efetuar a consulta!",
+        description: "Erro!",
+      });*/
+      setLoading(false);
+    }
+  }
 
-        await schema.validate(data, {
-          abortEarly: false,
-        });
-
-        await api.post('/developers', data);
-
-        history.push('/list');
-      } catch (err) {
-        if (err instanceof Yup.ValidationError) {
-          const errors = getValidationErrors(err);
-          formRef.current?.setErrors(errors);
+  function handleDelete(id: number) {
+    Swal.fire({
+      title: "Deseja excluir o registro?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Sim",
+      cancelButtonText: "Não",
+    }).then(async (result) => {
+      if (result.value) {
+        try {
+          setLoading(true);
+          await api.delete(`developers/${id}`);
+          history.push("/");
+          const response = await api.get(`developers?`);
+          setDeveloper(response.data);
+          setLoading(false);
+          /*addToast({
+            type: 'success',
+            title: 'Registro excluído',
+            description: 'Registro excluído com sucesso',
+          });*/
+        } catch (error) {
+          /*addToast({
+            type: 'error',
+            title: 'Excluir registro',
+            description: 'Ocorreu um erro ao excluir o registro',
+          });*/
+          setLoading(false);
         }
       }
-    }, [history],
-  );
+    });
+  }
+
+  const handleSearch = useCallback(() => {
+    getData(`developers?page=${page}&search=${search}`);
+  }, [page, search]);
+
+  useEffect(() => {
+    getData(`developers?page=${page}&limit=20&order=id`);
+  }, [page]);
 
   return (
-    <Container>
-      <Content>
-        <AnimationContainer>
-          <Form ref={formRef} onSubmit={handleSubmit}>
-            <h1>Faça Seu Cadastro</h1>
+    <>
+      <TitlePage title="Desenvolvedores" icon="fa-list" action="listagem" />
+      <section>
+        <div className="container-fluid">
+          <Card>
+            <div className="form-group col-sm-8 col-xs-12">
+              <Link to="/developers/new">
+                <ButtonCustom
+                  type="button"
+                  color="primary"
+                  icon="fa-plus-square"
+                >
+                  Incluir
+                </ButtonCustom>
+              </Link>
+            </div>
+            <div className="form-group col-sm-4 col-xs-12">
+              <div className="input-group">
+                <input
+                  type="text"
+                  placeholder="Buscar"
+                  className="form-control"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+                <span className="input-group-append">
+                  <ButtonCustom
+                    type="button"
+                    color="primary"
+                    onClick={handleSearch}
+                    icon="fa-search"
+                  />
+                </span>
+              </div>
+            </div>
+          </Card>
+          <div className="row">
+            <CardBody
+              size="12"
+              smallSize="12"
+              page={page}
+              count={count}
+              setPage={setPage}
+              loading={loading}
+            >
+              <Table id="developers" columns={columns}>
+                {developer &&
+                  developer.map((data) => (
+                    <tr key={data.id}>
+                      <td>{data.id}</td>
+                      <td>{data.name}</td>
+                      <td>{data.sex}</td>
+                      <td>{data.age}</td>
+                      <td>{data.hobby}</td>
+                      <td>{date(data.date_birth)}</td>
+                      <td className="text-right">
+                        <div className="btn-group">
+                          <button
+                            type="button"
+                            className="btn btn-primary btn-sm btn-flat"
+                            data-toggle="dropdown"
+                            aria-expanded="true"
+                          >
+                            <i className="fa fa-tasks" />
+                          </button>
 
-            <label htmlFor="name">Nome</label>
-            <Input type="text" name="name" />
+                          <div className="dropdown-menu dropdown-menu-right">
+                            <Link to={`/developers/${data.id}/edit`}>
+                              <button className="dropdown-item">
+                                <i className="fa fa-edit mr-2" />
+                                Editar
+                              </button>
+                            </Link>
 
-            <label htmlFor="sex">Sexo</label>
-            <Input type="text" name="sex" />
-
-            <label htmlFor="age">Idade</label>
-            <Input type="number" name="age" />
-
-            <label htmlFor="hobby">Hobby</label>
-            <Input type="text" name="hobby" />
-
-            <label htmlFor="date_birth">Data de Nascimento</label>
-            <Input type="date" name="date_birth" />
-
-            <button>Cadastrar</button>
-          </Form>
-
-          <Link to="/list">
-          Voltar
-          </Link>
-        </AnimationContainer>
-      </Content>
-    </Container>
+                            <button
+                              className="dropdown-item"
+                              onClick={() => handleDelete(data.id)}
+                            >
+                              <i className="fa fa-ban mr-2" /> Excluir
+                            </button>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+              </Table>
+            </CardBody>
+          </div>
+        </div>
+      </section>
+    </>
   );
 };
 
