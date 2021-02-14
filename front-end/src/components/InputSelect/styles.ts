@@ -14,11 +14,11 @@ export const Container = styled.div`
 `;
 
 export const Content = styled.div<ContentProps>`
-  background: #dcdcdc;
+  background: #F0FFF0;
   border-radius: 8px;
   
   border: 2px solid #232129;
-  color: #666360;
+  color: #000;
 
   & + div {
     margin-top: 8px;

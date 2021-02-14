@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Link, useHistory, useParams } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 import { Form } from "@unform/web";
 import { FormHandles } from "@unform/core";
 import * as Yup from "yup";
@@ -10,9 +10,9 @@ import api from "../../../services/api";
 import getValidationErrors from "../../../utils/validation";
 import Button from "../../../components/Button";
 import { FiArrowLeft } from "react-icons/fi";
-import { useToast } from "../../../hooks/toast";
 import normalizeDate from "../../../utils/normalizeDate";
 import Select from "../../../components/InputSelect";
+import Swal from "sweetalert2";
 
 interface DevelopersData {
   id?: number;
@@ -26,7 +26,6 @@ interface DevelopersData {
 const DevelopersForm: React.FC = () => {
   const { id }: any = useParams();
   const history = useHistory();
-  const { addToast } = useToast();
   const formRef = useRef<FormHandles>(null);
 
   const [data, setData] = useState<DevelopersData[]>([]);
@@ -36,7 +35,7 @@ const DevelopersForm: React.FC = () => {
     async function getData() {
       try {
         setLoading(true);
-        const response = await api.get(`developers?page=1&id=${id}&order=name`);
+        const response = await api.get(`developers?page=1&id=${id}&order=id`);
         setData(response.data.data[0]);
         console.log(response);
         setData({
@@ -45,15 +44,10 @@ const DevelopersForm: React.FC = () => {
         });
         formRef.current?.setFieldValue("sex", {
           value: response.data.data[0].sex,
-          label: response.data.data[0].sex ?? "M" ? 'Masculino' : 'Feminino',
+          label: "",
         });
         setLoading(false);
       } catch (error) {
-        /*addToast({
-          type: "error",
-          title: "Erro",
-          description: "Erro ao carregar o sistema",
-        });*/
         setLoading(false);
       }
     }
@@ -61,7 +55,7 @@ const DevelopersForm: React.FC = () => {
     if (id) {
       getData();
     }
-  }, [addToast, id]);
+  }, []);
 
   const handleSubmit = useCallback(
     async (data: DevelopersData) => {
@@ -69,7 +63,7 @@ const DevelopersForm: React.FC = () => {
         formRef.current?.setErrors({});
         const schema = Yup.object().shape({
           name: Yup.string().required("Nome obrigatório!"),
-          age: Yup.string().required("Idade obrigatória!").min(1, 'Idade inválida!'),
+          age: Yup.string().required("Idade obrigatória!"),
           date_birth: Yup.string().required("Data de nascimento obrigatória!"),
         });
 
@@ -82,11 +76,6 @@ const DevelopersForm: React.FC = () => {
         } else {
           await api.post("/developers", data);
         }
-        /*addToast({
-          type: "success",
-          title: "Cadastro realizado!",
-          description: "Salvo com Sucesso!.",
-        });*/
 
         history.push("/");
       } catch (err) {
@@ -94,23 +83,31 @@ const DevelopersForm: React.FC = () => {
           const errors = getValidationErrors(err);
           formRef.current?.setErrors(errors);
         }
-        /*addToast({
-          type: "error",
-          title: "Erro no cadastro!",
-          description:
-            "Ocorreu um erro ao enviar dados, por favor tente novamente.",
-        });*/
       }
     },
     [history]
   );
+
+  function handleCancel() {
+    Swal.fire({
+      title: "Deseja voltar para a Listagem?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Sim",
+      cancelButtonText: "Não",
+    }).then((result) => {
+      if (result.value) {
+        history.push("/");
+      }
+    });
+  }
 
   return (
     <Container>
       <Content>
         <AnimationContainer>
           <Form initialData={data} ref={formRef} onSubmit={handleSubmit}>
-            <h4>Cadastro de Desenvolvedor</h4>
+            <h5>Cadastro de Desenvolvedor</h5>
             <br />
             <label htmlFor="name">Nome</label>
             <Input type="text" name="name" />
@@ -124,6 +121,16 @@ const DevelopersForm: React.FC = () => {
                 { value: "M", label: "Masculino" },
                 { value: "F", label: "Feminino" },
               ]}
+              getOptionLabel={(option) => {
+                switch (option.value) {
+                  case "M":
+                    return "Masculino";
+                  case "F":
+                    return "Feminino";
+                  default:
+                    return "";
+                }
+              }}
             />
 
             <label htmlFor="age">Idade</label>
@@ -138,10 +145,10 @@ const DevelopersForm: React.FC = () => {
             <Button type="submit">Salvar</Button>
           </Form>
 
-          <Link to="/">
+          <a onClick={handleCancel}>
             <FiArrowLeft />
             Voltar para Listagem
-          </Link>
+          </a>
         </AnimationContainer>
       </Content>
     </Container>

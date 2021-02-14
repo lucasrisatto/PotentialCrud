@@ -14,23 +14,26 @@ to {
 `;
 
 export const Container = styled.div`
-height: 100vh;
-display: flex;
-align-items: center;
-justify-content: center;
-background: #e9ecef;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #dcdcdc;
 `;
 
 export const Content = styled.div`
-width: 500px;
-height: auto;
-text-align: center;
-justify-content: center;
-background: #fff;
-border-radius: 4px;
-box-shadow: 0px 0px 3px 0px rgba(0,0,0,0.27);
-  
-  
+  width: 650px;
+  height: auto;
+  text-align: center;
+  justify-content: center;
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0px 0px 3px 0px rgba(0, 0, 0, 0.27);
+
+  a {
+    cursor: pointer;
+    margin-top: -30px;
+  }
 `;
 
 export const AnimationContainer = styled.div`
