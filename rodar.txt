@@ -1,9 +1,0 @@
-npm install
-
-adonis migration:run
-
-adonis make:seed Develop
-
-Database Setup
-https://adonisjs.com
-
