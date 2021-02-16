@@ -23,7 +23,6 @@ export const Container = styled.div`
 
 export const Content = styled.div`
   width: 650px;
-  height: auto;
   text-align: center;
   justify-content: center;
   background: #fff;
@@ -32,7 +31,6 @@ export const Content = styled.div`
 
   a {
     cursor: pointer;
-    margin-top: -30px;
   }
 `;
 
@@ -41,7 +39,7 @@ export const AnimationContainer = styled.div`
   flex-direction: column;
   align-items: center;
 
-  animation: ${appearRight} 1s;
+  animation: ${appearRight} 2s;
 
   form {
     margin: 80px 0;
@@ -66,8 +64,5 @@ export const AnimationContainer = styled.div`
       color: ${shade(0.2, "#F4EDE8")};
     }
 
-    svg {
-      margin-right: 16px;
-    }
   }
 `;
