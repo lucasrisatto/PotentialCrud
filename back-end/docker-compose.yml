@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+  back-end:
+    container_name: back-end
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'
+    volumes:
+      - .:/var/www/html
+    env_file: .env
+
+  db:
+    container_name: db
+    image: postgres
+    ports: 
+      - '5432:5432'
+    volumes:
+      # - data:/var/lib/postgresql/data
+      - ./.docker/db/scripts:/etc/postgresql/scripts
+    environment:
+      - POSTGRES_USER
+      - POSTGRES_DB
+      - POSTGRES_PASSWORD
