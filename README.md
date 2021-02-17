@@ -1,12 +1,4 @@
 # PotentialCrud
-### Front-End 
-1. yarn install
-2. yarn start
-
-### Testes
-1. yarn test
-
-==========================================================
 
 ### Back-End
 1. npm install
@@ -24,3 +16,12 @@
 7. adonis make:seed Develop
 
 8. adonis serve --dev
+
+==========================================================
+
+### Front-End 
+1. yarn install
+2. yarn start
+
+### Testes
+1. yarn test
