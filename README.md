@@ -17,13 +17,7 @@
 
 3. Script para criação da base de dados (Arquivo na raiz do projeto).
 
-#### 4. Configurar arquivo .ENV na raiz da pasta back-end: 
-##### 4.1. DB_CONNECTION=pg
-##### 4.2. DB_HOST=127.0.0.1
-##### 4.3. DB_PORT=5432
-##### 4.4. DB_USER=postgres
-##### 4.5. DB_PASSWORD=root "Verificar qual senha está definida no PG"
-##### 4.6. DB_DATABASE=adonis
+#### 4. Configurar arquivo .ENV na raiz da pasta back-end (arquivo .ENV de exemplo na raiz do projeto, pasta Processos Internos): 
 
 5. adonis migration:run
 6. adonis make:seed Develop
